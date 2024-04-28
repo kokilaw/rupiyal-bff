@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Rupiyal BFF API
+  description: Backend service for Rupiyal FE
+  version: "1.0"
+servers:
+  - url: http://localhost:8080
+    description: Development server
+paths:
+  /currency-converter:
+    get:
+      summary: Get data for currency-converter page
+      description: Data needed for load the currency-converter page
+      parameters:
+        - in: query
+          name: currencyCode
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: numberOfDays
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: type
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Data needed for load the currency-converter page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyConverterResponse'
+        '401':
+          description: Authentication failed
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    CurrencyConverterResponse:
+      type: object
+      properties:
+        ratesSummary:
+          type: object
+        ratesMap:
+          type: object
+        bankDetailsMap:
+          type: object

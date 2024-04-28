@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const moment = require('moment');
 const _ = require('lodash')
 const bodyParser = require('body-parser');
 const axios = require('axios');
@@ -12,7 +11,6 @@ const port = process.env.PORT || 8090;
 app.use(bodyParser.json());
 
 async function getAccessToken() {
-    return "";
     const tokenUrl = process.env.CORE_API_OAUTH_TOKEN_URL;
     const clientId = process.env.CORE_API_OAUTH_CLIENT_ID;
     const clientSecret = process.env.CORE_API_OAUTH_CLIENT_SECRET;
