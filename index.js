@@ -6,7 +6,7 @@ const axios = require('axios');
 const authenticate = require('./src/authenticate');
 
 const app = express();
-const port = process.env.PORT || 8090;
+const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 
@@ -29,6 +29,7 @@ app.get('/currency-converter', async (req, res) => {
         const currencyCode = req.query.currencyCode;
         const numberOfDays = req.query.numberOfDays;
         const type = req.query.type;
+        console.log(`Request received - currencyCode[${currencyCode}] numberOfDays[${numberOfDays}] type[${type}]`);
         if (!currencyCode) {
             return res.status(400).send('currencyCode query parameter is required');
         }
