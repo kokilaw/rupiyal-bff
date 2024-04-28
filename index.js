@@ -11,6 +11,7 @@ const port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 
 async function getAccessToken() {
+    console.log("Getting access token")
     const tokenUrl = process.env.CORE_API_OAUTH_TOKEN_URL;
     const clientId = process.env.CORE_API_OAUTH_CLIENT_ID;
     const clientSecret = process.env.CORE_API_OAUTH_CLIENT_SECRET;
@@ -40,11 +41,13 @@ app.get('/currency-converter', async (req, res) => {
         const accessToken = await getAccessToken();
 
         const coreApiServiceUrl = process.env.CORE_API_SERVICE_URL;
+        console.log(`Getting exchange rates - [${coreApiServiceUrl}]`)
         const ratesResponse = await axios.get(`${coreApiServiceUrl}/internal/exchange-rates/${type.toLowerCase()}?currencyCode=${currencyCode}&lastNumberOfDays=${numberOfDays}`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             },
         });
+        console.log(`Getting bank details - [${coreApiServiceUrl}]`)
         const banksResponse = await axios.get(`${coreApiServiceUrl}/internal/banks`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
