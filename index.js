@@ -41,14 +41,14 @@ app.get('/currency-converter', async (req, res) => {
         const accessToken = await getAccessToken();
 
         const coreApiServiceUrl = process.env.CORE_API_SERVICE_URL;
-        console.log(`Getting exchange rates - [${coreApiServiceUrl}]`)
-        const ratesResponse = await axios.get(`${coreApiServiceUrl}/internal/exchange-rates/${type.toLowerCase()}?currencyCode=${currencyCode}&lastNumberOfDays=${numberOfDays}`, {
+        console.log(`Getting bank details - [${coreApiServiceUrl}]`)
+        const banksResponse = await axios.get(`${coreApiServiceUrl}/internal/banks`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             },
         });
-        console.log(`Getting bank details - [${coreApiServiceUrl}]`)
-        const banksResponse = await axios.get(`${coreApiServiceUrl}/internal/banks`, {
+        console.log(`Getting exchange rates - [${coreApiServiceUrl}]`)
+        const ratesResponse = await axios.get(`${coreApiServiceUrl}/internal/exchange-rates/${type.toLowerCase()}?currencyCode=${currencyCode}&lastNumberOfDays=${numberOfDays}`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             },
@@ -67,7 +67,7 @@ app.get('/currency-converter', async (req, res) => {
         }
         res.status(ratesResponse.status).send(response);
     } catch (error) {
-        console.error('Error fetching appointments:', error);
+        console.error('Error fetching exchange rates data:', error);
         res.status(error.response ? error.response.status : 500).send(error.message);
     }
 });
