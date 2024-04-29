@@ -30,12 +30,19 @@ app.get('/currency-converter', async (req, res) => {
         const currencyCode = req.query.currencyCode;
         const numberOfDays = req.query.numberOfDays;
         const type = req.query.type;
-        console.log(`Request received - currencyCode[${currencyCode}] numberOfDays[${numberOfDays}] type[${type}]`);
+        const bankCode = req.query.bankCode;
+        console.log(`Request received - currencyCode[${currencyCode}] numberOfDays[${numberOfDays}] type[${type}] bankCode[${bankCode}]`);
         if (!currencyCode) {
             return res.status(400).send('currencyCode query parameter is required');
         }
         if (!numberOfDays) {
             return res.status(400).send('numberOfDays query parameter is required');
+        }
+        if (!bankCode) {
+            return res.status(400).send('bankCode query parameter is required');
+        }
+        if (!type) {
+            return res.status(400).send('type query parameter is required');
         }
 
         const accessToken = await getAccessToken();
@@ -58,12 +65,20 @@ app.get('/currency-converter', async (req, res) => {
         
         const bankDetailsMap = getBankDetailsMapByBankCode(banksResponseData);
         const ratesMap = getRatesMapByDate(ratesResponseData);
-        const ratesSummary = getRatesSummaryByBank(ratesMap);
+
+        const latestDateAvailable = getLatestNthDateAvailable(ratesMap, 1);
+        const secondLatestDateAvailable = getLatestNthDateAvailable(ratesMap, 2);
+        const latestRateForBank = getLatestRateForBankCode(ratesMap[latestDateAvailable], bankCode);
+
+        const ratesSummary = getRatesSummaryByBank(ratesMap, latestDateAvailable, secondLatestDateAvailable);
+        const allBanksSummary = getAllBanksSummary(ratesSummary);
 
         const response = {
+            latestRateForBank,
             ratesSummary,
             ratesMap,
-            bankDetailsMap
+            bankDetailsMap,
+            allBanksSummary
         }
         res.status(ratesResponse.status).send(response);
     } catch (error) {
@@ -71,6 +86,24 @@ app.get('/currency-converter', async (req, res) => {
         res.status(error.response ? error.response.status : 500).send(error.message);
     }
 });
+
+const getLatestRateForBankCode = (ratesList, bankCode) => {
+    return _.filter(ratesList, (entry) => entry.bankCode == bankCode)[0]
+}
+
+const getLatestNthDateAvailable = (ratesMap, index = 1) => {
+    const dates = _.keys(ratesMap);
+    return dates[dates.length - index];
+}
+
+const getAllBanksSummary = (ratesSummary) => {
+    const averageChange = ratesSummary.map(entry => Number(entry.change)).reduce((a, b) => a + b) / ratesSummary.length;
+    return {
+        averageRate: ratesSummary.map(entry => Number(entry.rate)).reduce((a, b) => a + b) / ratesSummary.length,
+        averagechange: averageChange,
+        isPositive: averageChange >= 0
+    }
+}
 
 const getBankDetailsMapByBankCode = (bankResponse) => {
     return _.keyBy(bankResponse, 'bankCode');
@@ -81,12 +114,11 @@ const getRatesMapByDate = (ratesResponse) => {
     return _.groupBy(flattenRatesList, ({date}) => date);
 }
 
-const getRatesSummaryByBank = (ratesMap) => {
+const getRatesSummaryByBank = (ratesMap, latestDateAvailable, secondLatestDateAvailable) => {
     const dates = _.keys(ratesMap);
-    const latestDate = dates[dates.length - 1];
-    const secondLatestDate = dates[dates.length - 2];
-    const latestRates = ratesMap[latestDate];
-    const secondLatestRatesMap = _.groupBy(ratesMap[secondLatestDate], 'bankCode');
+    console.log(`Considered dates for the requests - ${JSON.stringify(dates)}`)
+    const latestRates = ratesMap[latestDateAvailable];
+    const secondLatestRatesMap = _.groupBy(ratesMap[secondLatestDateAvailable], 'bankCode');
     return latestRates.map(entry => {
         const { bankCode, rate, lastUpdated } = entry;
         const ratesDataForPreviousDay = secondLatestRatesMap[bankCode][0];
