@@ -98,10 +98,14 @@ const getLatestNthDateAvailable = (ratesMap, index = 1) => {
 }
 
 const getAllBanksSummary = (ratesSummary) => {
+    const averageRate = ratesSummary.map(entry => Number(entry.rate)).reduce((a, b) => a + b) / ratesSummary.length;
     const averageChange = ratesSummary.map(entry => Number(entry.change)).reduce((a, b) => a + b) / ratesSummary.length;
+    const previousAverageRate = averageRate + averageChange;
+    const averagechangePercentage = (averageChange * 100) / previousAverageRate;
     return {
-        averageRate: ratesSummary.map(entry => Number(entry.rate)).reduce((a, b) => a + b) / ratesSummary.length,
-        averagechange: averageChange,
+        averageRate,
+        averageChange,
+        averagechangePercentage,
         isPositive: averageChange >= 0
     }
 }
