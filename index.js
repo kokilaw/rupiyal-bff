@@ -7,6 +7,7 @@ const authenticate = require('./src/authenticate');
 
 const app = express();
 const port = process.env.PORT || 8080;
+const env = process.env.APP_ENV || "PROD";
 
 app.use(bodyParser.json());
 
@@ -45,7 +46,7 @@ app.get('/currency-converter', async (req, res) => {
             return res.status(400).send('type query parameter is required');
         }
 
-        const accessToken = await getAccessToken();
+        const accessToken = env == "DEV" ? "" : await getAccessToken();
 
         const coreApiServiceUrl = process.env.CORE_API_SERVICE_URL;
         console.log(`Getting bank details - [${coreApiServiceUrl}]`)

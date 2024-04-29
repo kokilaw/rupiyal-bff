@@ -27,6 +27,11 @@ paths:
           schema:
             type: string
           required: true
+        - in: query
+          name: bankCode
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: Data needed for load the currency-converter page
